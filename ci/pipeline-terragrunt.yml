@@ -82,6 +82,7 @@ resource_types:
 resources:
   - name: resource-src
     type: git
+    icon: github
     source:
       uri: git@github.com:skyscrapers/terragrunt-resource.git
       branch: terragrunt # TODO: update to master
@@ -97,19 +98,21 @@ resources:
   - name: terraform-release
     type: github-release
     check_every: 24h
+    icon: github
     source:
       user: hashicorp
       repository: terraform
       access_token: ((GITHUB_REPO_ACCESS_TOKEN_SKY_TECH))
   - name: terragrunt-resource-image
     type: docker-buildx
+    icon: docker
     source:
       repository: skyscrapers/terragrunt-resource
       tag: latest
-      email: ((DOCKER_HUB_SKYSCRAPERS_CREDS.email))
       username: ((DOCKER_HUB_SKYSCRAPERS_CREDS.username))
       password: ((DOCKER_HUB_SKYSCRAPERS_CREDS.password))
   - name: slack-alert
     type: slack-notification
+    icon: slack
     source:
       url: ((SLACK_NOTIFICATIONS_URL))
