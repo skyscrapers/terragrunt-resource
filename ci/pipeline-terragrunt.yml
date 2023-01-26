@@ -108,4 +108,4 @@ resources:
   - name: slack-alert
     type: slack-notification
     source:
-      url: ((SLACK_NOTIFICATIONS_UR))
+      url: ((SLACK_NOTIFICATIONS_URL))
