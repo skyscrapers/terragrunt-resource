@@ -52,7 +52,9 @@ jobs:
                   - "-c"
                   - |
                     TF_VERSION="$(cat terraform-release/tag)"
+                    TF_VERSION="${TF_VERSION:1}" # Trim trailing v from tag
                     TG_VERSION="$(cat terragrunt-release/tag)"
+                    TG_VERSION="${TG_VERSION:1}" # Trim trailing v from tag
                     SHA="$(cat resource-src/.git/short_ref)"
                     echo "${TF_VERSION} ${TF_VERSION}-${SHA} ${TF_VERSION}-${TG_VERSION}" > docker-metadata/tags
                     echo "{\"terraform_version\": \"${TF_VERSION}\", \"terragrunt_version\": \"${TG_VERSION}\"}" > docker-metadata/labels
