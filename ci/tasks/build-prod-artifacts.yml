@@ -8,13 +8,19 @@ image_resource:
     tag: dev
 
 inputs:
-- name: resource-src
+  - name: resource-src
+  - name: terraform-release
+    optional: true
+  - name: terragrunt-release
+    optional: true
 
 outputs:
-- name: build-artifacts
+  - name: build-artifacts
 
 run:
   path: resource-src/ci/tasks/build-multiarch-artifacts
 
 params:
   DOCKERFILE_DIR: "resource-src/docker-prod/"
+  TERRAGRUNT_RELEASE_DIR: "terragrunt-release"
+  TERRAFORM_RELEASE_DIR: "terraform-release"

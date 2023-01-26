@@ -1,6 +1,7 @@
 FROM alpine:latest
 
 ARG TARGETARCH
+ARG AWSCLI_VERSION=2.9.18
 
 RUN apk update && \
     apk add ca-certificates git bash openssh-client curl
@@ -24,6 +25,21 @@ RUN if [ "${TARGETARCH}" = "amd64" ]; then \
   fi; \
   apk add --force-overwrite /tmp/glibc.apk && \
   apk add /tmp/glibc-bin.apk && \
+  # Install awscli
+  if [ "${TARGETARCH}" = "amd64" ]; then \
+    curl -sL https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip -o awscliv2.zip; \
+  elif [ "${TARGETARCH}" = "arm64" ]; then \
+    curl -sL https://awscli.amazonaws.com/awscli-exe-linux-aarch64-${AWSCLI_VERSION}.zip -o awscliv2.zip; \
+  fi; \
+  unzip awscliv2.zip && \
+  aws/install && \
+  rm -rf \
+    awscliv2.zip \
+    aws \
+    /usr/local/aws-cli/v2/current/dist/aws_completer \
+    /usr/local/aws-cli/v2/current/dist/awscli/data/ac.index \
+    /usr/local/aws-cli/v2/current/dist/awscli/examples && \
+  find /usr/local/aws-cli/v2/current/dist/awscli/botocore/data -name examples-1.json -delete && \
   rm -rf /tmp/glibc.apk && \
   rm -rf /tmp/glibc-bin.apk
 

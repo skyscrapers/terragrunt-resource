@@ -18,6 +18,7 @@ USAGE:
 MANDATORY ARGUMENTS:
     --image-name <name>        Name of the Docker image you'd like to build, e.g. ljfranklin/terraform-resource:PR-test
     --terraform-url <url>      URL of the terraform release you'd like to include, e.g. https://releases.hashicorp.com/terraform/0.9.3/terraform_0.9.3_linux_amd64.zip
+    --terragrunt-url <url>      URL of the terragrunt release you'd like to include, e.g. https://github.com/gruntwork-io/terragrunt/releases/download/v0.43.0/terragrunt_linux_amd64
     --target-arch <arch>       Architecture to build the image for e.g. amd64 or arm64
 OPTIONAL ARGUMENTS:
     -h                         Prints this usage text.
@@ -55,6 +56,14 @@ while true ; do
       terraform_url="$2"
       shift 2
       ;;
+    --terragrunt-url)
+      if [ -z "$2" ]; then
+        >&2 echo -e "${red}--terragrunt-url requires an argument!${nc}"
+        exit 1
+      fi
+      terragrunt_url="$2"
+      shift 2
+      ;;
     --target-arch)
       if [ -z "$2" ]; then
         >&2 echo -e "${red}--target-arch requires an argument!${nc}"
@@ -82,6 +91,10 @@ if [ -z "${terraform_url}" ]; then
   >&2 echo -e "${red}Missing required flag --terraform-url <url>!${nc}"
   usage
 fi
+if [ -z "${terragrunt_url}" ]; then
+  >&2 echo -e "${red}Missing required flag --terragrunt-url <url>!${nc}"
+  usage
+fi
 
 tmpdir="$(mktemp -d /tmp/terraform-resource-docker.XXXXXX)"
 trap "{ rm -rf ${tmpdir}; }" EXIT
@@ -92,6 +105,10 @@ pushd "${tmpdir}" > /dev/null
   wget -q -O terraform.zip "${terraform_url}"
   mkdir -p ./amd64/terraform
   unzip -d ./amd64/terraform terraform.zip > /dev/null
+
+  echo "Downloading terragrunt from '${terragrunt_url}'..."
+  wget -q -O ./amd64/terraform/terragrunt "${terragrunt_url}"
+  chmod +x ./amd64/terraform/terragrunt
 
   echo "Compiling terraform-resource binaries..."
   CGO_ENABLED=0 GOOS=linux GOARCH=amd64 "${release_dir}/scripts/build" "$PWD/amd64" > /dev/null
