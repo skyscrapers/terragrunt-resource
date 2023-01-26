@@ -50,8 +50,9 @@ type Client interface {
 }
 
 type client struct {
-	model     models.Terraform
-	logWriter io.Writer
+	model                models.Terraform
+	logWriter            io.Writer
+	terragruntWorkingDir string
 }
 
 type StateVersion struct {
@@ -111,7 +112,46 @@ func (c *client) InitWithBackend() error {
 		return fmt.Errorf("terraform init command failed.\nError: %s\nOutput: %s", err, output)
 	}
 
+	if c.model.Terragrunt {
+		terragruntWorkingDir, err := c.getTerragruntWorkingDir()
+		if err != nil {
+			return err
+		}
+		c.terragruntWorkingDir = terragruntWorkingDir
+	}
+
 	return nil
+}
+
+func (c *client) getTerragruntWorkingDir() (string, error) {
+	infoArgs := []string{
+		"terragrunt-info",
+	}
+	infoCmd, err := c.terraformCmd(infoArgs, nil)
+	if err != nil {
+		return "", err
+	}
+
+	rawOutput, err := infoCmd.Output()
+	if err != nil {
+		errOutput := rawOutput
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			errOutput = exitErr.Stderr
+		}
+		return "", fmt.Errorf("Failed to retrieve Terragrunt working directory.\nError: %s\nOutput: %s", err, errOutput)
+	}
+
+	tgInfo := map[string]interface{}{}
+	if err = json.Unmarshal(rawOutput, &tgInfo); err != nil {
+		return "", fmt.Errorf("Failed to unmarshal JSON output.\nError: %s\nOutput: %s", err, rawOutput)
+	}
+
+	workingDir, ok := tgInfo["WorkingDir"].(string)
+	if !ok {
+		return "", fmt.Errorf("Expected string value for 'WorkingDir' but got '%#v'", tgInfo["WorkingDir"])
+	}
+
+	return workingDir, nil
 }
 
 func (c *client) writeBackendConfig(outputDir string) (string, error) {
@@ -373,7 +413,11 @@ func (c *client) JSONPlan() error {
 	}
 	rawOutput, err := showCmd.Output()
 	if err != nil {
-		return fmt.Errorf("Failed to retrieve output.\nError: %s\nOutput: %s", err, rawOutput)
+		errOutput := rawOutput
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			errOutput = exitErr.Stderr
+		}
+		return fmt.Errorf("Failed to retrieve output.\nError: %s\nOutput: %s", err, errOutput)
 	}
 
 	err = ioutil.WriteFile(c.model.JSONPlanFileLocalPath, rawOutput, 0644)
@@ -398,7 +442,11 @@ func (c *client) Output(envName string) (map[string]map[string]interface{}, erro
 
 	rawOutput, err := outputCmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to retrieve output.\nError: %s\nOutput: %s", err, rawOutput)
+		errOutput := rawOutput
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			errOutput = exitErr.Stderr
+		}
+		return nil, fmt.Errorf("Failed to retrieve output.\nError: %s\nOutput: %s", err, errOutput)
 	}
 
 	tfOutput := map[string]map[string]interface{}{}
@@ -441,6 +489,12 @@ func (c *client) OutputWithLegacyStorage() (map[string]map[string]interface{}, e
 }
 
 func (c *client) Version() (string, error) {
+	c.model.Terragrunt = false
+
+	defer func() {
+		c.model.Terragrunt = true
+	}()
+
 	outputCmd, err := c.terraformCmd([]string{
 		"-v",
 	}, nil)
@@ -768,6 +822,7 @@ func (c *client) SavePlanToBackend(planEnvName string) error {
 		return err
 	}
 	c.model.Source = tmpDir
+	c.model.Terragrunt = false
 
 	logPath := path.Join(os.TempDir(), "tf-plan.log")
 	logFile, err := os.OpenFile(logPath, os.O_RDWR|os.O_CREATE, 0600)
@@ -780,6 +835,7 @@ func (c *client) SavePlanToBackend(planEnvName string) error {
 	defer func() {
 		os.Chdir(origDir)
 		c.model.Source = origSource
+		c.model.Terragrunt = true
 		c.logWriter = origLogger
 	}()
 
@@ -810,6 +866,26 @@ func (c *client) SavePlanToBackend(planEnvName string) error {
 }
 
 func (c *client) GetPlanFromBackend(planEnvName string) error {
+	// Save original settings
+	origSource := c.model.Source
+	origDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	err = os.Chdir(c.terragruntWorkingDir)
+	if err != nil {
+		return err
+	}
+	c.model.Source = c.terragruntWorkingDir
+	c.model.Terragrunt = false
+
+	defer func() {
+		os.Chdir(origDir)
+		c.model.Source = origSource
+		c.model.Terragrunt = true
+	}()
+
 	if err := c.WorkspaceSelect(planEnvName); err != nil {
 		return err
 	}
@@ -886,7 +962,12 @@ func (c *client) resourceExistsLegacyStorage(tfID string) (bool, error) {
 }
 
 func (c *client) terraformCmd(args []string, env []string) (*runner.Runner, error) {
-	cmdPath, err := exec.LookPath("terraform")
+	bin := "terragrunt"
+	if !c.model.Terragrunt {
+		bin = "terraform"
+	}
+	cmdPath, err := exec.LookPath(bin)
+
 	if err != nil {
 		return nil, err
 	}

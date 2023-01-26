@@ -355,6 +355,7 @@ func (r Runner) buildTerraformModel(req models.OutRequest, tmpDir string) (model
 	terraformModel.Env["TF_VAR_atc_external_url"] = os.Getenv("ATC_EXTERNAL_URL")
 
 	terraformModel.DownloadPlugins = true
+	terraformModel.Terragrunt = true
 
 	return terraformModel, nil
 }
