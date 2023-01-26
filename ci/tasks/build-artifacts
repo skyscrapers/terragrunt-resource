@@ -11,6 +11,7 @@ workspace_dir="$( cd "${release_dir}" && cd .. && pwd )"
 
 if [ -f "${workspace_dir}/${TERRAFORM_RELEASE_DIR}/tag" ]; then
   terraform_version="$( cat "${workspace_dir}/${TERRAFORM_RELEASE_DIR}/tag" )"
+  terraform_version="${terraform_version:1}" # Trim trailing v from tag
 else
   terraform_version="$( cat "${release_dir}/config/terraform-version" )"
 fi

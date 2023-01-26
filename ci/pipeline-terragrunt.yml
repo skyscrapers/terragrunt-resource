@@ -24,6 +24,10 @@ jobs:
             trigger: true
           - get: terragrunt-release
             trigger: true
+            params:
+              globs:
+                - terragrunt_linux_amd64
+                - terragrunt_linux_arm64
           - get: terraform-release
             trigger: true
       - in_parallel:
@@ -43,7 +47,7 @@ jobs:
               outputs:
                 - name: docker-metadata
               run:
-                path: /bin/bash
+                path: /bin/sh
                 args:
                   - "-c"
                   - |
