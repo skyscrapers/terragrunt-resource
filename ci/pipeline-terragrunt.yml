@@ -87,7 +87,7 @@ resources:
     icon: github
     source:
       uri: git@github.com:skyscrapers/terragrunt-resource.git
-      branch: terragrunt # TODO: update to master
+      branch: master
       private_key: ((GIT_PRIVATE_KEY))
   - name: terragrunt-release
     type: github-release
