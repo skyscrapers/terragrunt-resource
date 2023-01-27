@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
 	"github.com/ljfranklin/terraform-resource/logger"
 	"github.com/ljfranklin/terraform-resource/models"
 )

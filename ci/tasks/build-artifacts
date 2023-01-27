@@ -9,7 +9,12 @@ workspace_dir="$( cd "${release_dir}" && cd .. && pwd )"
 : ${DOCKERFILE_DIR:?}
 : ${TARGETARCH:=amd64}
 
-terraform_version="$( cat "${release_dir}/config/terraform-version" )"
+if [ -f "${workspace_dir}/${TERRAFORM_RELEASE_DIR}/tag" ]; then
+  terraform_version="$( cat "${workspace_dir}/${TERRAFORM_RELEASE_DIR}/tag" )"
+  terraform_version="${terraform_version:1}" # Trim trailing v from tag
+else
+  terraform_version="$( cat "${release_dir}/config/terraform-version" )"
+fi
 
 # outputs
 if [ "$#" -eq 1 ]; then
@@ -44,5 +49,10 @@ pushd "${release_dir}" > /dev/null
 popd > /dev/null
 
 cp "${workspace_dir}/${DOCKERFILE_DIR}/Dockerfile" "${output_dir}/"
+
+if [ -f "${workspace_dir}/${TERRAGRUNT_RELEASE_DIR}/terragrunt_linux_${TARGETARCH}" ]; then
+  cp ${workspace_dir}/${TERRAGRUNT_RELEASE_DIR}/terragrunt_linux_${TARGETARCH} ${output_dir}/terraform/terragrunt
+  chmod +x ${output_dir}/terraform/terragrunt
+fi
 
 echo "Successfully fetched all Terraform artifacts!"
