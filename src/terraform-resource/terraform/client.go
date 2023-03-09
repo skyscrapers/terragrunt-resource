@@ -81,6 +81,7 @@ func (c *client) InitWithBackend() error {
 		"-input=false",
 		"-get=true",
 		"-backend=true",
+		"-lockfile=readonly",
 		fmt.Sprintf("-backend-config=%s", backendConfigPath),
 	}
 	if c.model.PluginDir != "" {
@@ -255,6 +256,7 @@ func (c *client) InitWithoutBackend() error {
 		"-input=false",
 		"-get=true",
 		"-backend=false",
+		"-lockfile=readonly",
 	}
 	if c.model.PluginDir != "" {
 		initArgs = append(initArgs, fmt.Sprintf("-plugin-dir=%s", c.model.PluginDir))
