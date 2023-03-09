@@ -886,9 +886,9 @@ func (c *client) GetPlanFromBackend(planEnvName string) error {
 		c.model.Terragrunt = true
 	}()
 
-	if err := c.WorkspaceSelect(planEnvName); err != nil {
-		return err
-	}
+	// if err := c.WorkspaceSelect(planEnvName); err != nil {
+	// 	return err
+	// }
 
 	outputs, err := c.Output(planEnvName)
 	if err != nil {
