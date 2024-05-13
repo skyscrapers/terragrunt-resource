@@ -1,6 +1,6 @@
 ## Terragrunt Concourse Resource
 
-> **This is an adaptation of the [terraform-resource](https://github.com/ljfranklin/terraform-resource) to work with [Terragrunt](https://terragrunt.gruntwork.io/) configurations.**
+> **This is an adaptation of the [terraform-resource](https://github.com/ljfranklin/terraform-resource) to work with [OpenTofu](https://opentofu.org/) and [Terragrunt](https://terragrunt.gruntwork.io/) configurations.**
 > All configuration remains the same.
 
 A [Concourse](http://concourse-ci.org/) resource that allows jobs to modify IaaS resources via [Terraform](https://www.terraform.io/).
