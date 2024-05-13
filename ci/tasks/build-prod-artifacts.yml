@@ -9,7 +9,7 @@ image_resource:
 
 inputs:
   - name: resource-src
-  - name: terraform-release
+  - name: opentofu-release
     optional: true
   - name: terragrunt-release
     optional: true
@@ -23,4 +23,4 @@ run:
 params:
   DOCKERFILE_DIR: "resource-src/docker-prod/"
   TERRAGRUNT_RELEASE_DIR: "terragrunt-release"
-  TERRAFORM_RELEASE_DIR: "terraform-release"
+  TERRAFORM_RELEASE_DIR: "opentofu-release"

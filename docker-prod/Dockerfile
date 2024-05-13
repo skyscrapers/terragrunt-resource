@@ -1,10 +1,10 @@
 FROM alpine:latest
 
 ARG TARGETARCH
-ARG AWSCLI_VERSION=2.9.18
+ARG AWSCLI_VERSION=2.15.48
 
 RUN apk update && \
-    apk add ca-certificates git bash openssh-client curl
+  apk add ca-certificates git bash openssh-client curl
 
 # this glibc compatibility module is needed for some downloaded binaries,
 # such as aws cli, to run in provisioners.
@@ -15,30 +15,30 @@ RUN apk update && \
 # TODO: Remove --force-overwrite once
 # https://github.com/sgerrand/alpine-pkg-glibc/issues/185 is fixed
 RUN if [ "${TARGETARCH}" = "amd64" ]; then \
-    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
-    wget -q -O /tmp/glibc.apk https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.32-r0/glibc-2.32-r0.apk && \
-    wget -q -O /tmp/glibc-bin.apk https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.32-r0/glibc-bin-2.32-r0.apk; \
+  wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
+  wget -q -O /tmp/glibc.apk https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.32-r0/glibc-2.32-r0.apk && \
+  wget -q -O /tmp/glibc-bin.apk https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.32-r0/glibc-bin-2.32-r0.apk; \
   elif [ "${TARGETARCH}" = "arm64" ]; then \
-    wget -q -O /etc/apk/keys/ljfranklin-glibc.pub https://github.com/ljfranklin/alpine-pkg-glibc/releases/download/2.32-r0-arm64/ljfranklin-glibc.pub && \
-    wget -q -O /tmp/glibc.apk https://github.com/ljfranklin/alpine-pkg-glibc/releases/download/2.32-r0-arm64/glibc-2.32-r0.apk && \
-    wget -q -O /tmp/glibc-bin.apk https://github.com/ljfranklin/alpine-pkg-glibc/releases/download/2.32-r0-arm64/glibc-bin-2.32-r0.apk; \
+  wget -q -O /etc/apk/keys/ljfranklin-glibc.pub https://github.com/ljfranklin/alpine-pkg-glibc/releases/download/2.32-r0-arm64/ljfranklin-glibc.pub && \
+  wget -q -O /tmp/glibc.apk https://github.com/ljfranklin/alpine-pkg-glibc/releases/download/2.32-r0-arm64/glibc-2.32-r0.apk && \
+  wget -q -O /tmp/glibc-bin.apk https://github.com/ljfranklin/alpine-pkg-glibc/releases/download/2.32-r0-arm64/glibc-bin-2.32-r0.apk; \
   fi; \
   apk add --force-overwrite /tmp/glibc.apk && \
   apk add /tmp/glibc-bin.apk && \
   # Install awscli
   if [ "${TARGETARCH}" = "amd64" ]; then \
-    curl -sL https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip -o awscliv2.zip; \
+  curl -sL https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip -o awscliv2.zip; \
   elif [ "${TARGETARCH}" = "arm64" ]; then \
-    curl -sL https://awscli.amazonaws.com/awscli-exe-linux-aarch64-${AWSCLI_VERSION}.zip -o awscliv2.zip; \
+  curl -sL https://awscli.amazonaws.com/awscli-exe-linux-aarch64-${AWSCLI_VERSION}.zip -o awscliv2.zip; \
   fi; \
   unzip awscliv2.zip && \
   aws/install && \
   rm -rf \
-    awscliv2.zip \
-    aws \
-    /usr/local/aws-cli/v2/current/dist/aws_completer \
-    /usr/local/aws-cli/v2/current/dist/awscli/data/ac.index \
-    /usr/local/aws-cli/v2/current/dist/awscli/examples && \
+  awscliv2.zip \
+  aws \
+  /usr/local/aws-cli/v2/current/dist/aws_completer \
+  /usr/local/aws-cli/v2/current/dist/awscli/data/ac.index \
+  /usr/local/aws-cli/v2/current/dist/awscli/examples && \
   find /usr/local/aws-cli/v2/current/dist/awscli/botocore/data -name examples-1.json -delete && \
   rm -rf /tmp/glibc.apk && \
   rm -rf /tmp/glibc-bin.apk
@@ -50,8 +50,8 @@ RUN chmod 0600 $HOME/.ssh/config
 
 RUN mkdir -p /usr/local/share/terraform/plugins/github.com/ashald/stateful/1.2.0/linux_${TARGETARCH}/ && \
   wget -O /usr/local/share/terraform/plugins/github.com/ashald/stateful/1.2.0/linux_${TARGETARCH}/terraform-provider-stateful_v1.2.0 \
-    "https://github.com/ashald/terraform-provider-stateful/releases/download/v1.2.0/terraform-provider-stateful_v1.2.0-linux-${TARGETARCH}" && \
+  "https://github.com/ashald/terraform-provider-stateful/releases/download/v1.2.0/terraform-provider-stateful_v1.2.0-linux-${TARGETARCH}" && \
   chmod +x /usr/local/share/terraform/plugins/github.com/ashald/stateful/1.2.0/linux_${TARGETARCH}/terraform-provider-stateful_v1.2.0
 COPY $TARGETARCH/terraform/* /usr/local/bin/
-RUN terraform --version
+RUN tofu --version
 COPY $TARGETARCH/check $TARGETARCH/in $TARGETARCH/out /opt/resource/
