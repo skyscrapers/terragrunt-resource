@@ -967,7 +967,7 @@ func (c *client) resourceExistsLegacyStorage(tfID string) (bool, error) {
 func (c *client) terraformCmd(args []string, env []string) (*runner.Runner, error) {
 	bin := "terragrunt"
 	if !c.model.Terragrunt {
-		bin = "terraform"
+		bin = "tofu"
 	}
 	cmdPath, err := exec.LookPath(bin)
 
