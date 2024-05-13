@@ -53,5 +53,5 @@ RUN mkdir -p /usr/local/share/terraform/plugins/github.com/ashald/stateful/1.2.0
   "https://github.com/ashald/terraform-provider-stateful/releases/download/v1.2.0/terraform-provider-stateful_v1.2.0-linux-${TARGETARCH}" && \
   chmod +x /usr/local/share/terraform/plugins/github.com/ashald/stateful/1.2.0/linux_${TARGETARCH}/terraform-provider-stateful_v1.2.0
 COPY $TARGETARCH/terraform/* /usr/local/bin/
-RUN terraform --version
+RUN tofu --version
 COPY $TARGETARCH/check $TARGETARCH/in $TARGETARCH/out /opt/resource/
