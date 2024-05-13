@@ -29,18 +29,9 @@ trap "{ rm -rf "${tmp_dir}" ; }" EXIT
 
 pushd "${tmp_dir}" > /dev/null
   echo "Downloading artifacts..."
-  wget -O terraform_${terraform_version}_linux_${TARGETARCH}.zip https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_${TARGETARCH}.zip
-  wget -O terraform_SHA256SUMS https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_SHA256SUMS
-  wget -O terraform_SHA256SUMS.sig https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_SHA256SUMS.sig
+  wget -O opentofu_${terraform_version}_linux_${TARGETARCH}.zip https://github.com/opentofu/opentofu/releases/download/v${terraform_version}/tofu_${terraform_version}_linux_amd64.zip
+  unzip opentofu_${terraform_version}_linux_${TARGETARCH}.zip -d "${output_dir}/terraform"
 
-  echo "Verifying artifacts..."
-  # verify checksum file with Hashicorp public key
-  # https://www.hashicorp.com/security.html
-  gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 72D7468F
-  gpg --verify terraform_SHA256SUMS.sig terraform_SHA256SUMS
-  grep terraform_${terraform_version}_linux_${TARGETARCH}.zip terraform_SHA256SUMS | sha256sum -c -
-
-  unzip terraform_${terraform_version}_linux_${TARGETARCH}.zip -d "${output_dir}/terraform"
 popd > /dev/null
 
 echo "Building resource..."

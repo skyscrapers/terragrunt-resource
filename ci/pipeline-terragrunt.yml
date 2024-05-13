@@ -30,6 +30,10 @@ jobs:
                 - terragrunt_linux_arm64
           - get: opentofu-release
             trigger: true
+            params:
+              globs:
+                - tofu_*_linux_amd64
+                - tofu_*_linux_arm64
       - in_parallel:
           - task: write-docker-metadata-files
             config:

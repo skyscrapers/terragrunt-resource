@@ -32,7 +32,8 @@ if [ "$#" = 0 ]; then
 fi
 
 image_name=""
-terraform_url=""
+opentofu_url=""
+terragrunt_url=""
 target_arch=""
 set +u
 while true ; do
