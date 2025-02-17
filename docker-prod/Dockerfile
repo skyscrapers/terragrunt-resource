@@ -3,7 +3,7 @@ FROM alpine:latest
 ARG TARGETARCH
 
 RUN apk update && \
-  apk add aws-cli ca-certificates git bash openssh-client curl
+  apk add aws-cli ca-certificates git bash openssh-client curl sops
 RUN aws --version
 
 RUN mkdir -p $HOME/.ssh
