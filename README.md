@@ -32,6 +32,10 @@ See [Terraform Input Variables](https://www.terraform.io/language/values/variabl
 
 * `private_key`: *Optional.* An SSH key used to fetch modules, e.g. [private GitHub repos](https://www.terraform.io/docs/modules/sources.html#private-github-repos).
 
+* `web_identity_token`: *Optional.* An OIDC token (JWT) used for keyless AWS authentication. When set together with `role_arn`, the resource writes the token to a 0600 file and exports `AWS_WEB_IDENTITY_TOKEN_FILE` (and `AWS_ROLE_ARN`) for every `tofu`/`terragrunt`/`aws` invocation. The AWS SDK default credential chain then assumes the role via `AssumeRoleWithWebIdentity`, so terraform/tofu, the AWS provider, and CLI tools like `aws eks get-token` all pick up the web-identity credentials with no static access key. Backward-compatible: omit both fields to keep using static keys via `env` (e.g. `AWS_ACCESS_KEY_ID`).
+
+* `role_arn`: *Optional.* The ARN of the AWS IAM role to assume via web identity. Used together with `web_identity_token`; sets `AWS_ROLE_ARN`. Has no effect unless `web_identity_token` is also set.
+
 #### Source Example
 
 ```yaml

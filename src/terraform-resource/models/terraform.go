@@ -27,15 +27,17 @@ type Terraform struct {
 	Parallelism           int                    `json:"parallelism,omitempty"`           // optional
 	LockTimeout           string                 `json:"lock_timeout,omitempty"`          // optional
 	PrivateKey            string                 `json:"private_key,omitempty"`
-	PlanFileLocalPath     string                 `json:"-"` // not specified pipeline
-	JSONPlanFileLocalPath string                 `json:"-"` // not specified pipeline
-	PlanFileRemotePath    string                 `json:"-"` // not specified pipeline
-	StateFileLocalPath    string                 `json:"-"` // not specified pipeline
-	StateFileRemotePath   string                 `json:"-"` // not specified pipeline
-	Imports               map[string]string      `json:"-"` // not specified pipeline
-	ConvertedVarFiles     []string               `json:"-"` // not specified pipeline
-	DownloadPlugins       bool                   `json:"-"` // not specified pipeline
-	Terragrunt            bool                   `json:"-"` // not specified pipeline
+	WebIdentityToken      string                 `json:"web_identity_token,omitempty"` // optional
+	RoleArn               string                 `json:"role_arn,omitempty"`           // optional
+	PlanFileLocalPath     string                 `json:"-"`                            // not specified pipeline
+	JSONPlanFileLocalPath string                 `json:"-"`                            // not specified pipeline
+	PlanFileRemotePath    string                 `json:"-"`                            // not specified pipeline
+	StateFileLocalPath    string                 `json:"-"`                            // not specified pipeline
+	StateFileRemotePath   string                 `json:"-"`                            // not specified pipeline
+	Imports               map[string]string      `json:"-"`                            // not specified pipeline
+	ConvertedVarFiles     []string               `json:"-"`                            // not specified pipeline
+	DownloadPlugins       bool                   `json:"-"`                            // not specified pipeline
+	Terragrunt            bool                   `json:"-"`                            // not specified pipeline
 }
 
 const (
@@ -96,6 +98,14 @@ func (m Terraform) Merge(other Terraform) Terraform {
 
 	if other.PrivateKey != "" {
 		m.PrivateKey = other.PrivateKey
+	}
+
+	if other.WebIdentityToken != "" {
+		m.WebIdentityToken = other.WebIdentityToken
+	}
+
+	if other.RoleArn != "" {
+		m.RoleArn = other.RoleArn
 	}
 
 	if other.PlanOnly {
