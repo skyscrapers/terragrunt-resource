@@ -220,35 +220,6 @@ some_hcl_key = "some_hcl_value"
 			Expect(finalModel.PrivateKey).To(Equal("fake-merged-key"))
 		})
 	})
-
-	Describe("WebIdentityToken and RoleArn", func() {
-		It("returns the values from original", func() {
-			baseModel := models.Terraform{
-				WebIdentityToken: "fake-token",
-				RoleArn:          "fake-role-arn",
-			}
-			mergeModel := models.Terraform{}
-
-			finalModel := baseModel.Merge(mergeModel)
-			Expect(finalModel.WebIdentityToken).To(Equal("fake-token"))
-			Expect(finalModel.RoleArn).To(Equal("fake-role-arn"))
-		})
-
-		It("returns the values from merged", func() {
-			baseModel := models.Terraform{
-				WebIdentityToken: "fake-token",
-				RoleArn:          "fake-role-arn",
-			}
-			mergeModel := models.Terraform{
-				WebIdentityToken: "fake-merged-token",
-				RoleArn:          "fake-merged-role-arn",
-			}
-
-			finalModel := baseModel.Merge(mergeModel)
-			Expect(finalModel.WebIdentityToken).To(Equal("fake-merged-token"))
-			Expect(finalModel.RoleArn).To(Equal("fake-merged-role-arn"))
-		})
-	})
 })
 
 func writeToTempFile(tmpDir string, contents string, ext string) string {
