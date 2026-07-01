@@ -53,7 +53,6 @@ type client struct {
 	model                models.Terraform
 	logWriter            io.Writer
 	terragruntWorkingDir string
-	webIdentityTokenFile string
 }
 
 type StateVersion struct {
@@ -994,45 +993,5 @@ func (c *client) terraformCmd(args []string, env []string) (*runner.Runner, erro
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
 	}
 
-	// When both web_identity_token and role_arn are set, materialise the token
-	// to a file and export the standard AWS SDK web-identity env vars. The AWS
-	// SDK default credential chain (used by tofu/terragrunt, the AWS provider,
-	// and CLI tools like `aws eks get-token`) then assumes the role via
-	// AssumeRoleWithWebIdentity. Opt-in and backward-compatible: when the fields
-	// are absent, static-key Env passthrough (AWS_ACCESS_KEY_ID, ...) is unchanged.
-	if c.model.WebIdentityToken != "" && c.model.RoleArn != "" {
-		tokenFile, err := c.webIdentityTokenFilePath()
-		if err != nil {
-			return nil, err
-		}
-		cmd.Env = append(cmd.Env, fmt.Sprintf("AWS_ROLE_ARN=%s", c.model.RoleArn))
-		cmd.Env = append(cmd.Env, fmt.Sprintf("AWS_WEB_IDENTITY_TOKEN_FILE=%s", tokenFile))
-	}
-
 	return runner.New(cmd, c.logWriter), nil
-}
-
-// webIdentityTokenFilePath writes the OIDC web-identity token to a 0600 file
-// once and caches the path on the client, so subsequent terraform/aws calls
-// reuse the same file. The token value itself is never logged.
-func (c *client) webIdentityTokenFilePath() (string, error) {
-	if c.webIdentityTokenFile != "" {
-		return c.webIdentityTokenFile, nil
-	}
-
-	tokenFile, err := ioutil.TempFile("", "aws-web-identity-token-*")
-	if err != nil {
-		return "", err
-	}
-	defer tokenFile.Close()
-
-	if err := tokenFile.Chmod(0600); err != nil {
-		return "", err
-	}
-	if _, err := tokenFile.WriteString(c.model.WebIdentityToken); err != nil {
-		return "", err
-	}
-
-	c.webIdentityTokenFile = tokenFile.Name()
-	return c.webIdentityTokenFile, nil
 }
